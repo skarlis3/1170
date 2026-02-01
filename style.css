@@ -29,6 +29,10 @@
   /* Drawer header (mobile sidenav) */
   --drawer-header-bg:var(--accent);
   --drawer-header-fg:#fff;
+
+  /* Accent box backgrounds (light mode) */
+  --accent-box-bg: color-mix(in srgb, var(--focus) 7%, white);
+  --accent-box-text: #000;
 }
 
 /* ==================== Dark Mode Tokens ==================== */
@@ -47,6 +51,10 @@
   --accent2:#ddc8f0;
   --drawer-header-bg:#1f2125;
   --drawer-header-fg:#d4d7dc;
+
+  /* Accent box backgrounds (dark mode) */
+  --accent-box-bg: #1e2329;
+  --accent-box-text: #d4d7dc;
 }
 
 /* ==================== Global resets (safe) ==================== */
@@ -207,10 +215,10 @@ label[for="topnav-toggle"],
 
 
 /* ===================== At a glance box ======================== */
-  .glance-accent-box{
+.glance-accent-box{
   border: 1px solid var(--border);
   border-left: 6px solid var(--accent);
-  background: color-mix(in srgb, var(--focus) 7%, white); 
+  background: var(--accent-box-bg);
   padding: 1rem 1.75rem .8rem;
   margin: 1rem 0 1.75rem;
   border-radius: 6px;
@@ -219,13 +227,19 @@ label[for="topnav-toggle"],
   margin-top: 0;
   font-family: "Judson", serif;
   font-size: 1.2rem;
-  color: #000;
+  color: var(--accent-box-text);
 }
 
 .glance-accent-box h3{
   margin-top: 0;
   font-family: "Judson", serif;
   font-size: 1.2rem;
+  color: var(--text);
+}
+
+/* Dark mode accent box enhancements */
+[data-theme="dark"] .glance-accent-box {
+  border-left-color: var(--bright);
 }
 
 
@@ -243,18 +257,25 @@ label[for="topnav-toggle"],
 
 
 /* ==================== Examples & Tips Box  ======================== */
-  .tips-accent-box{
+.tips-accent-box{
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--focus) 7%, white); 
-  padding: .8rem 1.75rem .6rem;
-  margin: 1rem 0 1.25rem;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-box-bg);
+  padding: 1rem 1.75rem .8rem;
+  margin: 1rem 0 1.75rem 0;
+  margin-left: 0;
   border-radius: 6px;
+}
+
+/* Dark mode tips box enhancement */
+[data-theme="dark"] .tips-accent-box {
+  border-left-color: var(--bright);
 }
 .tips-accent-box h2{
   margin-top: 0;
   font-family: "Judson", serif;
   font-size: 1.2rem;
-  color: #000;
+  color: var(--accent-box-text);
 }
 
 .tips-accent-box h3{
@@ -262,6 +283,7 @@ label[for="topnav-toggle"],
   margin-bottom: .5em;
   font-family: "Judson", serif;
   font-size: 1.2rem;
+  color: var(--text);
 }
 
 /* ==================== Transparency Statement, Licensing, & Sources  ======================== */
@@ -736,17 +758,6 @@ html {
 }
 
 /* ==================== Dark Mode Overrides ==================== */
-[data-theme="dark"] .glance-accent-box,
-[data-theme="dark"] .tips-accent-box{
-  background: #1f2228;
-  border-color: #3a3f4a;
-}
-[data-theme="dark"] .glance-accent-box h2,
-[data-theme="dark"] .glance-accent-box h3,
-[data-theme="dark"] .tips-accent-box h2,
-[data-theme="dark"] .tips-accent-box h3{
-  color: var(--text);
-}
 [data-theme="dark"] .grid-item{
   background-color: #1f2228;
   border-color: #3a3f4a;
@@ -795,79 +806,65 @@ html {
 }
 
 /* ==================== Dark Mode Toggle Button ==================== */
-.theme-toggle{
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.4);
-  border-radius: .4rem;
-  padding: .4rem .6rem;
+.theme-toggle {
+  position: fixed !important;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999 !important;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--border, #e2e3e5);
+  background: var(--bg, #ffffff);
+  color: var(--text, #141414);
   cursor: pointer;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  transition: background .2s, border-color .2s;
-}
-.theme-toggle:hover{
-  background: rgba(255,255,255,.1);
-  border-color: rgba(255,255,255,.6);
-}
-.theme-toggle svg{
-  width: 20px;
-  height: 20px;
-}
-.theme-toggle .icon-sun{ display: none; }
-.theme-toggle .icon-moon{ display: block; }
-[data-theme="dark"] .theme-toggle .icon-sun{ display: block; }
-[data-theme="dark"] .theme-toggle .icon-moon{ display: none; }
-[data-theme="dark"] .theme-toggle{
-  border-color: rgba(255,255,255,.3);
-  color: var(--text);
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Mobile bottom nav dark mode toggle */
-.bn-theme-toggle{
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  gap: .25rem;
-  min-width: 58px;
-  color: rgba(255,255,255,.9);
+.theme-toggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,.2);
 }
-.bn-theme-toggle .bn-ico{
-  line-height: 0;
-  display: grid;
-  place-items: center;
-  width: 50px;
-  height: 50px;
-  position: relative;
-  margin-top: -10px;
-}
-.bn-theme-toggle .bn-label{
-  font: 400 .82rem "Lato",system-ui,sans-serif;
-  padding-bottom: 6px;
-  color: rgba(255,255,255,.9);
-}
-.bn-theme-toggle .icon-sun{ display: none; }
-.bn-theme-toggle .icon-moon{ display: block; }
-[data-theme="dark"] .bn-theme-toggle .icon-sun{ display: block; }
-[data-theme="dark"] .bn-theme-toggle .icon-moon{ display: none; }
 
-/* Smaller theme icon in mobile bottom nav */
-@media (max-width: 740px){
-  .bn-theme-toggle{
-    min-width: 44px;
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s;
+}
+
+/* Sun icon (shown in dark mode) */
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+[data-theme="dark"] .theme-toggle {
+  border-color: var(--border);
+  box-shadow: 0 2px 10px rgba(0,0,0,.4);
+}
+
+/* Mobile: position in upper right to avoid bottom nav */
+@media (max-width: 740px) {
+  .theme-toggle {
+    bottom: auto;
+    top: calc(var(--topnav-h, 56px) + 0.75rem);
+    right: 1rem;
+    width: 44px;
+    height: 44px;
   }
-  .bn-theme-toggle .bn-ico{
-    width: 36px;
-    height: 36px;
-    margin-top: -6px;
-  }
-  .bn-theme-toggle .bn-ico svg{
-    width: 18px;
-    height: 18px;
+  .theme-toggle svg {
+    width: 22px;
+    height: 22px;
   }
 }
 

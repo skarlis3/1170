@@ -37,15 +37,6 @@
     localStorage.setItem("theme", next);
   };
 
-  // Attach theme toggle listener immediately (event delegation)
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".theme-toggle, .bn-theme-toggle");
-    if (btn) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleTheme();
-    }
-  });
 
   const init = () => {
     try {
@@ -170,7 +161,6 @@
               ${TOP_NAV.map(i => `
                 <li><a href="${esc(i.href)}"${isNavActive(i.href) ? ' aria-current="page"' : ''}>${esc(i.label)}</a></li>
               `).join("")}
-              <li><button class="theme-toggle" aria-label="Toggle dark mode" type="button">${sunIcon}${moonIcon}</button></li>
             </ul>
           </div>
         </nav>`;
@@ -207,12 +197,6 @@
                   <span class="bn-label">${esc(i.label)}</span>
                 </a>
               </li>`).join("")}
-            <li>
-              <button class="bn-theme-toggle" aria-label="Toggle dark mode" type="button">
-                <span class="bn-ico">${sunIcon}${moonIcon}</span>
-                <span class="bn-label">Theme</span>
-              </button>
-            </li>
           </ul>
         </nav>`;
 
@@ -380,10 +364,47 @@
     }
   };
 
+  // Separate function to create theme toggle - runs independently of init
+  const createThemeToggle = () => {
+    if (document.querySelector('.theme-toggle')) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'theme-toggle';
+    btn.setAttribute('aria-label', 'Toggle dark mode');
+    btn.setAttribute('title', 'Toggle dark mode');
+    // Add inline styles as fallback to ensure visibility
+    btn.style.cssText = 'position:fixed !important; bottom:1.5rem; right:1.5rem; z-index:99999 !important; width:48px; height:48px; border-radius:50%; border:2px solid var(--bright, #4711b2); background:var(--bg, #fff); color:var(--text, #333); cursor:pointer; display:flex !important; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.3);';
+    btn.innerHTML = `
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+    `;
+    btn.addEventListener('click', toggleTheme);
+    document.body.appendChild(btn);
+  };
+
   // Run init when DOM is ready, or immediately if already loaded
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
+      createThemeToggle();
+    });
   } else {
     init();
+    createThemeToggle();
   }
+
+  // Fallback: also try on window load in case something went wrong
+  window.addEventListener('load', createThemeToggle);
 })();
