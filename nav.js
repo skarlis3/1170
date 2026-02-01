@@ -267,6 +267,10 @@
 
       // -------------------- Injection --------------------
       if (!document.querySelector(".topnav")) document.body.insertAdjacentHTML("afterbegin", renderTopNav());
+      // Add skip link for accessibility (must be first element in body)
+      if (!document.querySelector(".skip-link")) {
+        document.body.insertAdjacentHTML("afterbegin", '<a href="#page-content" class="skip-link">Skip to main content</a>');
+      }
       if (!document.querySelector(".bottomnav")) document.body.insertAdjacentHTML("beforeend", renderBottomNav());
 
       let layout = document.querySelector(".layout");
