@@ -31,6 +31,24 @@
   --drawer-header-fg:#fff;
 }
 
+/* ==================== Dark Mode Tokens ==================== */
+/* Colors meet WCAG AAA 7:1 contrast ratio against #121416 */
+[data-theme="dark"]{
+  --bg:#121416;
+  --sidebar-bg:#1a1c1f;
+  --text:#d4d7dc;
+  --muted:#b8bcc4;
+  --border:#2d3139;
+  --hover:#252830;
+  --accent:#d0b8e8;
+  --accent-contrast:#121416;
+  --focus:#d4bcea;
+  --bright:#c9afe0;
+  --accent2:#ddc8f0;
+  --drawer-header-bg:#1f2125;
+  --drawer-header-fg:#d4d7dc;
+}
+
 /* ==================== Global resets (safe) ==================== */
 html, body { margin: 0 !important; }
 html, body { height: 100%; }
@@ -714,6 +732,154 @@ mark {
 
 html {
   scroll-behavior: smooth;
+}
+
+/* ==================== Dark Mode Overrides ==================== */
+[data-theme="dark"] .glance-accent-box,
+[data-theme="dark"] .tips-accent-box{
+  background: #1f2228;
+  border-color: #3a3f4a;
+}
+[data-theme="dark"] .glance-accent-box h2,
+[data-theme="dark"] .glance-accent-box h3,
+[data-theme="dark"] .tips-accent-box h2,
+[data-theme="dark"] .tips-accent-box h3{
+  color: var(--text);
+}
+[data-theme="dark"] .grid-item{
+  background-color: #1f2228;
+  border-color: #3a3f4a;
+}
+[data-theme="dark"] .bottom-statement{
+  border-top-color: #4a4f5a;
+}
+[data-theme="dark"] .bottom-statement h2,
+[data-theme="dark"] .bottom-statement h3{
+  color: #c0c4cc;
+}
+[data-theme="dark"] .bottom-statement p,
+[data-theme="dark"] .bottom-statement ul{
+  color: #b0b5bd;
+}
+[data-theme="dark"] .example-assignment{
+  border-color: #4a4f5a;
+}
+[data-theme="dark"] mark{
+  background-color: #3d3a20;
+  color: #e8e4c0;
+}
+/* Keep topnav with original colors in dark mode */
+[data-theme="dark"] .topnav{
+  background: #260444 !important;
+}
+[data-theme="dark"] .topnav .menu > li > a[aria-current="page"]{
+  background: #3b006f !important;
+}
+[data-theme="dark"] .bottomnav{
+  background: #1a1c1f;
+  border-top-color: #2d3139;
+}
+[data-theme="dark"] .site-footer{
+  background: #0a0b0c;
+}
+[data-theme="dark"] .sidenav a[aria-current="page"]{
+  background: #2a2d33;
+}
+[data-theme="dark"] .nav-level-2 > li > a:hover,
+[data-theme="dark"] .sub-toggle:hover,
+[data-theme="dark"] .nav-level-3 > li > a:hover,
+[data-theme="dark"] .nav-level-4 > li > a:hover,
+[data-theme="dark"] .nav-level-5 > li > a:hover{
+  background: var(--hover);
+}
+
+/* ==================== Dark Mode Toggle Button ==================== */
+.theme-toggle{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: .4rem;
+  padding: .4rem .6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: background .2s, border-color .2s;
+}
+.theme-toggle:hover{
+  background: rgba(255,255,255,.1);
+  border-color: rgba(255,255,255,.6);
+}
+.theme-toggle svg{
+  width: 20px;
+  height: 20px;
+}
+.theme-toggle .icon-sun{ display: none; }
+.theme-toggle .icon-moon{ display: block; }
+[data-theme="dark"] .theme-toggle .icon-sun{ display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon{ display: none; }
+[data-theme="dark"] .theme-toggle{
+  border-color: rgba(255,255,255,.3);
+  color: var(--text);
+}
+
+/* Mobile bottom nav dark mode toggle */
+.bn-theme-toggle{
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  gap: .25rem;
+  min-width: 58px;
+  color: rgba(255,255,255,.9);
+}
+.bn-theme-toggle .bn-ico{
+  line-height: 0;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  position: relative;
+  margin-top: -10px;
+}
+.bn-theme-toggle .bn-label{
+  font: 400 .82rem "Lato",system-ui,sans-serif;
+  padding-bottom: 6px;
+  color: rgba(255,255,255,.9);
+}
+.bn-theme-toggle .icon-sun{ display: none; }
+.bn-theme-toggle .icon-moon{ display: block; }
+[data-theme="dark"] .bn-theme-toggle .icon-sun{ display: block; }
+[data-theme="dark"] .bn-theme-toggle .icon-moon{ display: none; }
+
+/* Smaller theme icon in mobile bottom nav */
+@media (max-width: 740px){
+  .bn-theme-toggle{
+    min-width: 44px;
+  }
+  .bn-theme-toggle .bn-ico{
+    width: 36px;
+    height: 36px;
+    margin-top: -6px;
+  }
+  .bn-theme-toggle .bn-ico svg{
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Dark mode: mobile sidenav button text should be dark against light purple bg */
+[data-theme="dark"] .open-sidenav-btn{
+  background: var(--focus);
+  color: #1a1c1f;
+  border-color: var(--focus);
+}
+
+/* Dark mode: active bottom nav icon should be dark against white circle */
+[data-theme="dark"] .bn-item[aria-current="page"] .bn-ico{
+  color: #1a1c1f;
 }
 
 

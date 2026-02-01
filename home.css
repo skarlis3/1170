@@ -81,4 +81,11 @@
   }
 }
 
+/* ==================== Dark Mode for Home Hero ==================== */
+[data-theme="dark"] .home-hero__card{
+  background: #1a1c1f;
+  border-color: #2d3139;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+
 

@@ -5,7 +5,49 @@
   if (window.__NAV_INITED__) return;
   window.__NAV_INITED__ = true;
 
-  document.addEventListener("DOMContentLoaded", () => {
+  // Apply saved theme immediately to prevent flash, or use system preference
+  const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const savedTheme = localStorage.getItem("theme");
+
+  const applySystemTheme = () => {
+    document.documentElement.setAttribute("data-theme", darkModeQuery.matches ? "dark" : "light");
+  };
+
+  if (savedTheme) {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  } else {
+    applySystemTheme();
+  }
+
+  // Listen for system theme changes (only if user hasn't set a preference)
+  darkModeQuery.addEventListener("change", () => {
+    if (!localStorage.getItem("theme")) {
+      applySystemTheme();
+    }
+  });
+
+  // -------------------- Theme Toggle (defined outside DOMContentLoaded) --------------------
+  const sunIcon = `<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+  const moonIcon = `<svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
+  const toggleTheme = () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+  };
+
+  // Attach theme toggle listener immediately (event delegation)
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".theme-toggle, .bn-theme-toggle");
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleTheme();
+    }
+  });
+
+  const init = () => {
     try {
       // -------------------- Data --------------------
       const TOP_NAV = [
@@ -77,6 +119,10 @@
         if (!href) return false;
         const h = clean(href);
         const hBare = h.split("#")[0].split("?")[0];
+        // For index.html, compare full paths to avoid matching across directories
+        if (hBare === "index.html") {
+          return path === "/index.html" || path === "/" || path === "";
+        }
         if (last === hBare) return true;
         if (path.endsWith("/" + hBare)) return true;
         const stem = hBare.endsWith(".html") ? hBare.slice(0, -5) : hBare;
@@ -95,7 +141,11 @@
         if (isCurrent(href)) return true;
         const cur = new URL(location.href).pathname.toLowerCase().replace(/\/+$/, "");
         const dir = sectionDir(href);
-        return dir === "/" ? cur.endsWith("/index.html") || cur === "/" : cur.startsWith(dir);
+        // Home should only be active on the root page, not subdirectories
+        if (dir === "/") {
+          return cur === "/" || cur === "" || cur === "/index.html" || cur === "/index";
+        }
+        return cur.startsWith(dir);
       };
       const menuTitleFor = (label) => {
         const L = String(label || "").toLowerCase();
@@ -120,6 +170,7 @@
               ${TOP_NAV.map(i => `
                 <li><a href="${esc(i.href)}"${isNavActive(i.href) ? ' aria-current="page"' : ''}>${esc(i.label)}</a></li>
               `).join("")}
+              <li><button class="theme-toggle" aria-label="Toggle dark mode" type="button">${sunIcon}${moonIcon}</button></li>
             </ul>
           </div>
         </nav>`;
@@ -156,6 +207,12 @@
                   <span class="bn-label">${esc(i.label)}</span>
                 </a>
               </li>`).join("")}
+            <li>
+              <button class="bn-theme-toggle" aria-label="Toggle dark mode" type="button">
+                <span class="bn-ico">${sunIcon}${moonIcon}</span>
+                <span class="bn-label">Theme</span>
+              </button>
+            </li>
           </ul>
         </nav>`;
 
@@ -313,8 +370,16 @@
 
       if (document.body.classList.contains("sidenav-show-all"))
         document.body.classList.add("sidenav-force-open");
+
     } catch (err) {
       console.error("nav.js initialization error:", err);
     }
-  });
+  };
+
+  // Run init when DOM is ready, or immediately if already loaded
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
