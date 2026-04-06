@@ -96,7 +96,7 @@
             { label: "Technology", href: "/policies/technology.html" },
             { label: "Office Hours", href: "/policies/office-hours.html" },
             { label: "Academic Integrity", href: "/policies/academic-integrity.html" },
-            { label: "Instructor GenAI Use", href: "/policies/instructor-genai.html" }
+            { label: "GenAI Policy", href: "/policies/genai-policy.html" }
           ]
         }
       ];
