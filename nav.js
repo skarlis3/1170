@@ -80,6 +80,13 @@
           href: "/resources/index.html",
           children: [
             { label: "Active & Passive Voice", href: "/resources/active-passive-voice.html" },
+            { label: "Using the Passive Voice", href: "/resources/using-passive-voice.html" },
+            { label: "Parts of a Sentence", href: "/resources/parts-of-sentence.html" },
+            { label: "Sentence Fragments", href: "/resources/sentence-fragments.html" },
+            { label: "Sentence Structure & Readability", href: "/resources/sentence-structure.html" },
+            { label: "Paragraphing", href: "/resources/paragraphing.html" },
+            { label: "Flow", href: "/resources/flow.html" },
+            { label: "Transitions", href: "/resources/transitions.html" },
             { label: "Connecting Ideas Through Transitions", href: "/resources/connecting-ideas-transitions.html" },
           ]
         },
