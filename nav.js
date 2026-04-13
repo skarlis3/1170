@@ -84,6 +84,7 @@
             { label: "Parts of a Sentence", href: "/resources/parts-of-sentence.html" },
             { label: "Sentence Fragments", href: "/resources/sentence-fragments.html" },
             { label: "Sentence Structure & Readability", href: "/resources/sentence-structure.html" },
+            { label: "Avoiding Awkwardness", href: "/resources/avoiding-awkwardness.html" },
             { label: "Paragraphing", href: "/resources/paragraphing.html" },
             { label: "Flow", href: "/resources/flow.html" },
             { label: "Transitions", href: "/resources/transitions.html" },
