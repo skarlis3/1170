@@ -78,7 +78,10 @@
         {
           label: "Resources",
           href: "/resources/index.html",
-
+          children: [
+            { label: "Active & Passive Voice", href: "/resources/active-passive-voice.html" },
+            { label: "Connecting Ideas Through Transitions", href: "/resources/connecting-ideas-transitions.html" },
+          ]
         },
         {
           label: "Calendars",
