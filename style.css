@@ -45,30 +45,32 @@
 }
 
 /* ==================== Dark Mode Tokens ==================== */
-/* Colors meet WCAG AAA 7:1 contrast ratio against #141315 */
+/* Colors meet WCAG AAA 7:1 contrast ratio against #0d0b0f */
 [data-theme="dark"]{
-  /* Neutrals sit on the site's own hue (272°, the purple) at low saturation.
-     They used to be a blue-grey at 210–220° / 10% — the identical grey used on
-     the teal 1181 site — so on both sites the neutral pulled a direction the
-     brand colour didn't, which is what read as a clash. Lightness is unchanged
-     apart from --text, which was lifted; every ratio below is AAA. */
-  --bg:#141315;              /* 15.0:1 under --text - AAA ✓ */
-  --sidebar-bg:#1d1b1e;      /* 13.9:1 under --text - AAA ✓ */
-  --text:#e8e7e9;
-  --muted:#beb9c3;           /* 9.6:1 on --bg - AAA ✓ */
-  --border:#332e38;
-  --hover:#2b272e;
+  /* Surfaces sit on the site's own hue (272°, the purple) at 15% saturation,
+     with the main reading area at 5% lightness. They used to be a blue-grey at
+     210–220° / 10% — the identical grey used on the teal 1181 site — so the
+     neutral pulled a direction the brand colour didn't, which is what read as a
+     clash. A first pass at 7–9% saturation moved the surfaces by 1–3 steps out
+     of 255, under what the eye resolves, so it changed nothing visible. These
+     go far enough to read as a very dark plum rather than as grey. */
+  --bg:#0d0b0f;              /* 15.7:1 under --text - AAA ✓ */
+  --sidebar-bg:#161319;      /* 14.7:1 under --text; sidebar links 9.4:1 - AAA ✓ */
+  --text:#e7e5e9;
+  --muted:#beb6c6;           /* 10.0:1 on --bg - AAA ✓ */
+  --border:#2b2432;
+  --hover:#241e2a;
   --accent:#d0b8e8;
-  --accent-contrast:#141315;
+  --accent-contrast:#0d0b0f;
   --focus:#d4bcea;
   --bright:#c9afe0;
   --accent2:#ddc8f0;
-  --drawer-header-bg:#222024;
-  --drawer-header-fg:#e8e7e9;
+  --drawer-header-bg:#221d27;
+  --drawer-header-fg:#e7e5e9;
 
   /* Accent box backgrounds (dark mode) */
-  --accent-box-bg: #242126;
-  --accent-box-text: #e8e7e9;
+  --accent-box-bg: #1e1922;
+  --accent-box-text: #e7e5e9;
 }
 
 /* ==================== Global resets (safe) ==================== */
@@ -817,10 +819,10 @@ html {
   border-top-color: var(--border);
 }
 [data-theme="dark"] .site-footer{
-  background: #0b0a0c;
+  background: #0b090d;
 }
 [data-theme="dark"] .sidenav a[aria-current="page"]{
-  background: #2f2a33;
+  background: #2f2835;
 }
 [data-theme="dark"] .nav-level-2 > li > a:hover,
 [data-theme="dark"] .sub-toggle:hover,
@@ -894,13 +896,13 @@ html {
 /* Dark mode: mobile sidenav button text should be dark against light purple bg */
 [data-theme="dark"] .open-sidenav-btn{
   background: var(--focus);
-  color: #1d1b1e;
+  color: #161319;
   border-color: var(--focus);
 }
 
 /* Dark mode: active bottom nav icon should be dark against white circle */
 [data-theme="dark"] .bn-item[aria-current="page"] .bn-ico{
-  color: #1d1b1e;
+  color: #161319;
 }
 
 /* ==================== Skip Navigation Link ==================== */
