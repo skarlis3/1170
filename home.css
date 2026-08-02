@@ -12,7 +12,7 @@
 .home-hero__card {
   position: relative;
   z-index: 1;
-  background: #fff;
+  background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -83,8 +83,10 @@
 
 /* ==================== Dark Mode for Home Hero ==================== */
 [data-theme="dark"] .home-hero__card{
-  background: #1a1c1f;
-  border-color: #2d3139;
+  /* Background and border used to be hardcoded #1a1c1f / #2d3139 here. When the
+     dark surfaces were retuned onto the site's purple, this card kept the old
+     blue-grey and stopped matching every other page. It reads the tokens now,
+     the way the 1181 site's card always has, so it follows on its own. */
   box-shadow: 0 4px 20px rgba(0,0,0,.4);
 }
 
