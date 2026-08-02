@@ -45,25 +45,30 @@
 }
 
 /* ==================== Dark Mode Tokens ==================== */
-/* Colors meet WCAG AAA 7:1 contrast ratio against #121416 */
+/* Colors meet WCAG AAA 7:1 contrast ratio against #141315 */
 [data-theme="dark"]{
-  --bg:#121416;
-  --sidebar-bg:#1a1c1f;
-  --text:#d4d7dc;
-  --muted:#b8bcc4;
-  --border:#2d3139;
-  --hover:#252830;
+  /* Neutrals sit on the site's own hue (272°, the purple) at low saturation.
+     They used to be a blue-grey at 210–220° / 10% — the identical grey used on
+     the teal 1181 site — so on both sites the neutral pulled a direction the
+     brand colour didn't, which is what read as a clash. Lightness is unchanged
+     apart from --text, which was lifted; every ratio below is AAA. */
+  --bg:#141315;              /* 15.0:1 under --text - AAA ✓ */
+  --sidebar-bg:#1d1b1e;      /* 13.9:1 under --text - AAA ✓ */
+  --text:#e8e7e9;
+  --muted:#beb9c3;           /* 9.6:1 on --bg - AAA ✓ */
+  --border:#332e38;
+  --hover:#2b272e;
   --accent:#d0b8e8;
-  --accent-contrast:#121416;
+  --accent-contrast:#141315;
   --focus:#d4bcea;
   --bright:#c9afe0;
   --accent2:#ddc8f0;
-  --drawer-header-bg:#1f2125;
-  --drawer-header-fg:#d4d7dc;
+  --drawer-header-bg:#222024;
+  --drawer-header-fg:#e8e7e9;
 
   /* Accent box backgrounds (dark mode) */
-  --accent-box-bg: #1e2329;
-  --accent-box-text: #d4d7dc;
+  --accent-box-bg: #242126;
+  --accent-box-text: #e8e7e9;
 }
 
 /* ==================== Global resets (safe) ==================== */
@@ -149,8 +154,33 @@ body{
 /* ==================== Top Navigation (desktop default) ==================== */
 .topnav{
   position:sticky; top:0; z-index:1000;
-  background: var(--navbar-bg); color:#fff;
+  color:#fff;
   font-weight:400; font-size:1.05em;
+
+  /* Frosted bar. The brand colour goes slightly translucent over a blur, so page
+     content diffuses as it passes underneath instead of stopping at a hard line.
+     The opacity is deliberately high: the glass reads through the blur and the
+     sheen below, not by lightening the colour, so the bar stays as deep as it
+     has always been. Dark mode can afford a touch more translucency because the
+     page behind it is dark — it can't wash the colour out. */
+  background: color-mix(in srgb, var(--navbar-bg) 94%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+[data-theme="dark"] .topnav{
+  background: color-mix(in srgb, var(--navbar-bg) 88%, transparent);
+}
+/* the lit top edge, and a soft fade onto the page rather than a hard rule */
+.topnav::before{
+  content:""; position:absolute; inset:0 0 auto; height:2px; pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,0));
+}
+.topnav::after{
+  content:""; position:absolute; left:0; right:0; top:100%; height:16px; pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,.09), transparent);
+}
+[data-theme="dark"] .topnav::after{
+  background:linear-gradient(180deg, rgba(0,0,0,.30), transparent);
 }
 .topnav-inner{
   display:flex; align-items:center; gap:1rem;
@@ -783,14 +813,14 @@ html {
    They now read --navbar-bg / --navbar-active, which don't. Same colours on
    screen; no override, no !important. */
 [data-theme="dark"] .bottomnav{
-  background: #1a1c1f;
-  border-top-color: #2d3139;
+  background: var(--sidebar-bg);
+  border-top-color: var(--border);
 }
 [data-theme="dark"] .site-footer{
-  background: #0a0b0c;
+  background: #0b0a0c;
 }
 [data-theme="dark"] .sidenav a[aria-current="page"]{
-  background: #2a2d33;
+  background: #2f2a33;
 }
 [data-theme="dark"] .nav-level-2 > li > a:hover,
 [data-theme="dark"] .sub-toggle:hover,
@@ -864,13 +894,13 @@ html {
 /* Dark mode: mobile sidenav button text should be dark against light purple bg */
 [data-theme="dark"] .open-sidenav-btn{
   background: var(--focus);
-  color: #1a1c1f;
+  color: #1d1b1e;
   border-color: var(--focus);
 }
 
 /* Dark mode: active bottom nav icon should be dark against white circle */
 [data-theme="dark"] .bn-item[aria-current="page"] .bn-ico{
-  color: #1a1c1f;
+  color: #1d1b1e;
 }
 
 /* ==================== Skip Navigation Link ==================== */
