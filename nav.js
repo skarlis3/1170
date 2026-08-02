@@ -37,6 +37,13 @@
     localStorage.setItem("theme", next);
   };
 
+  // Says what the button will DO, not what it is — and has to be re-read after
+  // every toggle, which the old fixed "Toggle dark mode" label never was.
+  const themeLabel = () =>
+    document.documentElement.getAttribute("data-theme") === "dark"
+      ? "Switch to light mode"
+      : "Switch to dark mode";
+
 
   const init = () => {
     try {
@@ -163,12 +170,13 @@
         </svg>`.trim();
 
       // -------------------- Renderers --------------------
+      // No top-nav hamburger: the checkbox and label that used to live here were
+      // rendered on every page and then hidden outright by style.css. Mobile uses
+      // the .bottomnav for page navigation instead.
       const renderTopNav = () => `
-        <input type="checkbox" id="topnav-toggle" class="nav-toggle" />
         <nav class="topnav" role="navigation" aria-label="Top">
           <div class="topnav-inner">
             <a class="brand" href="/index.html">ENGL 1170</a>
-            <label for="topnav-toggle" class="hamburger" aria-label="Toggle main menu">☰</label>
             <ul class="menu">
               ${TOP_NAV.map(i => `
                 <li><a href="${esc(i.href)}"${isNavActive(i.href) ? ' aria-current="page"' : ''}>${esc(i.label)}</a></li>
@@ -247,19 +255,26 @@
         </li>`;
       };
 
+      // The checkbox is kept only as the CSS state flag (every drawer rule keys off
+      // `#sidenav-toggle:checked`). It is not an operable control any more: the
+      // buttons below flip it in JS, so it's taken out of the tab order and hidden
+      // from assistive tech.
+      // The scrim is a plain <div>. It used to be a <label> marked aria-hidden —
+      // interactive but hidden from AT, which is an ARIA violation. Clicking it now
+      // closes the drawer via script; keyboard users use Escape or the Close button.
       const renderSideNav = (items, title = "Section Menu") => `
-        <input type="checkbox" id="sidenav-toggle" class="nav-toggle" />
-        <nav class="sidenav sidenav--fullscreen" role="navigation" aria-label="${esc(title)}">
+        <input type="checkbox" id="sidenav-toggle" class="nav-toggle" tabindex="-1" aria-hidden="true" />
+        <nav id="sidenav" class="sidenav sidenav--fullscreen" role="navigation" aria-label="${esc(title)}">
           <div class="sidenav__bar">
             <div class="sidenav__title">${esc(title)}</div>
-            <label for="sidenav-toggle" class="sidenav-close" aria-label="Close ${esc(title)}">
+            <button type="button" class="sidenav-close" aria-label="Close ${esc(title)}">
               <span class="x" aria-hidden="true">×</span>
               <span>Close</span>
-            </label>
+            </button>
           </div>
           <ul class="nav-level-1">${items.map(renderSideGroup).join("")}</ul>
         </nav>
-        <label for="sidenav-toggle" class="sidenav-scrim" aria-hidden="true"></label>`;
+        <div class="sidenav-scrim"></div>`;
 
       // -------------------- Injection --------------------
       if (!document.querySelector(".topnav")) document.body.insertAdjacentHTML("afterbegin", renderTopNav());
@@ -290,7 +305,7 @@
       if (!noSidenav && itemsForSidenav && !document.querySelector(".sidenav"))
         layout.insertAdjacentHTML("beforeend", renderSideNav(itemsForSidenav, sectionTitle));
       if (!document.querySelector("main.content")) {
-        const openBtn = itemsForSidenav ? `<label for="sidenav-toggle" class="open-sidenav-btn">☰ ${esc(sectionTitle)}</label>` : "";
+        const openBtn = itemsForSidenav ? `<button type="button" class="open-sidenav-btn" aria-controls="sidenav" aria-expanded="false"><span aria-hidden="true">☰</span> ${esc(sectionTitle)}</button>` : "";
         layout.insertAdjacentHTML("beforeend", `<main class="content">${openBtn}</main>`);
       }
       if (!itemsForSidenav) layout.classList.add("centered-layout");
@@ -322,15 +337,75 @@
         document.body.style.width = "";
         window.scrollTo(0, lockedY);
       };
-      if (checkbox) {
-        const syncLock = () => (checkbox.checked && mm.matches ? lockBody() : unlockBody());
-        checkbox.addEventListener("change", syncLock);
-        mm.addEventListener("change", () => { if (!mm.matches) unlockBody(); });
-      }
+      // -------------------- Drawer open/close + focus management --------------------
+      // The drawer is opened and closed here rather than by the checkbox's own label
+      // clicks, so that focus can be moved into the drawer on open and returned to the
+      // opening button on close. Without this, focus stays on the page behind the
+      // overlay and Tab walks through content the user can't see.
+      (function initDrawer() {
+        if (!checkbox) return;
+        const drawer = document.getElementById("sidenav");
+        const openBtnEl = document.querySelector(".open-sidenav-btn");
+        const closeBtnEl = drawer && drawer.querySelector(".sidenav-close");
+        const scrimEl = document.querySelector(".sidenav-scrim");
+        if (!drawer) return;
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && checkbox && checkbox.checked) checkbox.checked = false;
-      });
+        let lastFocus = null;
+
+        // Only things actually on screen — filters out collapsed sub-menus.
+        const focusables = () =>
+          Array.from(drawer.querySelectorAll('a[href], button:not([disabled])'))
+            .filter((el) => el.offsetParent !== null);
+
+        const setDrawer = (open) => {
+          if (checkbox.checked === open) return;
+          checkbox.checked = open;
+          if (openBtnEl) openBtnEl.setAttribute("aria-expanded", open ? "true" : "false");
+
+          if (open) {
+            lastFocus = document.activeElement;
+            lockBody();
+            // Let the CSS :checked rules apply before we try to focus inside.
+            requestAnimationFrame(() => {
+              const target = closeBtnEl || focusables()[0];
+              if (target) target.focus();
+            });
+          } else {
+            unlockBody();
+            // offsetParent guards against handing focus back to something that got
+            // hidden while the drawer was open.
+            const usable = lastFocus && lastFocus.isConnected && lastFocus.offsetParent !== null;
+            const back = usable ? lastFocus : openBtnEl;
+            lastFocus = null;
+            if (back && back.focus) back.focus();
+          }
+        };
+
+        if (openBtnEl) openBtnEl.addEventListener("click", () => setDrawer(true));
+        if (closeBtnEl) closeBtnEl.addEventListener("click", () => setDrawer(false));
+        if (scrimEl) scrimEl.addEventListener("click", () => setDrawer(false));
+
+        // Following a link should close the drawer behind you.
+        drawer.addEventListener("click", (e) => {
+          if (e.target.closest("a[href]")) setDrawer(false);
+        });
+
+        document.addEventListener("keydown", (e) => {
+          // Above 900px the sidenav is a normal static sidebar, not a drawer.
+          if (!checkbox.checked || !mm.matches) return;
+          if (e.key === "Escape") { e.preventDefault(); setDrawer(false); return; }
+          if (e.key !== "Tab") return;
+          const f = focusables();
+          if (!f.length) return;
+          const first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          else if (!drawer.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+        });
+
+        // If the drawer is somehow open when we grow past the breakpoint, reset it.
+        mm.addEventListener("change", () => { if (!mm.matches && checkbox.checked) setDrawer(false); });
+      })();
 
       if (!noSidenav && sidenavEl) {
         const groups = Array.from(sidenavEl.querySelectorAll(".group"));
@@ -381,11 +456,11 @@
     if (document.querySelector('.theme-toggle')) return;
 
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = 'theme-toggle';
-    btn.setAttribute('aria-label', 'Toggle dark mode');
-    btn.setAttribute('title', 'Toggle dark mode');
-    // Add inline styles as fallback to ensure visibility
-    btn.style.cssText = 'position:fixed !important; bottom:1.5rem; right:1.5rem; z-index:99999 !important; width:48px; height:48px; border-radius:50%; border:2px solid var(--bright, #4711b2); background:var(--bg, #fff); color:var(--text, #333); cursor:pointer; display:flex !important; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.3);';
+    // All appearance lives in style.css (.theme-toggle) — do not set inline styles
+    // here. Inline declarations beat stylesheet ones, !important or not, which is
+    // what made the stylesheet rule dead code for as long as it was set this way.
     btn.innerHTML = `
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -402,8 +477,24 @@
         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
       </svg>
     `;
-    btn.addEventListener('click', toggleTheme);
-    document.body.appendChild(btn);
+    const syncLabel = () => {
+      btn.setAttribute('aria-label', themeLabel());
+      btn.setAttribute('title', themeLabel());
+    };
+    syncLabel();
+
+    btn.addEventListener('click', () => { toggleTheme(); syncLabel(); });
+
+    // Lives in the top bar, so it is laid out rather than floating over the
+    // page — it can't collide with content or with the mobile drawer.
+    // Only if the nav failed to render does it fall back to floating.
+    const host = document.querySelector('.topnav-inner');
+    if (host) {
+      host.appendChild(btn);
+    } else {
+      btn.classList.add('theme-toggle--floating');
+      document.body.appendChild(btn);
+    }
   };
 
   // Run init when DOM is ready, or immediately if already loaded

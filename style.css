@@ -26,6 +26,15 @@
   --maxw:100%;
   --bottomnav-h:78px;
 
+  /* Top bar chrome. Deliberately its own token rather than var(--accent):
+     --accent has to flip to a light purple in dark mode so it can be read as
+     text on a dark page, but the top bar stays deep purple with white text in
+     BOTH themes. Two [data-theme="dark"] rules used to pin these values back
+     with !important; a token of their own means dark mode never changes them
+     and the overrides aren't needed at all. */
+  --navbar-bg:#260444;
+  --navbar-active:#3b006f;
+
   /* Drawer header (mobile sidenav) */
   --drawer-header-bg:var(--accent);
   --drawer-header-fg:#fff;
@@ -140,7 +149,7 @@ body{
 /* ==================== Top Navigation (desktop default) ==================== */
 .topnav{
   position:sticky; top:0; z-index:1000;
-  background: var(--accent); color:#fff;
+  background: var(--navbar-bg); color:#fff;
   font-weight:400; font-size:1.05em;
 }
 .topnav-inner{
@@ -149,22 +158,15 @@ body{
   max-width:var(--maxw); margin-inline:auto;
 }
 .topnav .brand{ color:#fff; font-weight:400; font-size:1.20em; }
-.topnav .menu{ list-style:none; display:flex; gap:.5rem; margin:0 0 0 auto; padding:0;}
+.topnav .menu{ list-style:none; display:flex; align-items:center; gap:.5rem; margin:0 0 0 auto; padding:0;}
 .topnav .menu > li > a{ display:block; padding:.6rem .9rem; border-radius:.4rem; color:#fff; text-decoration: none;}
 .topnav .menu > li > a:hover{ outline:1px solid #fff; }
 .topnav .menu > li > a:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
 .topnav .brand:focus-visible{ outline:2px solid #fff; outline-offset:4px; }
-.topnav .menu > li > a[aria-current="page"]{ background:var(--focus); text-decoration: none;}
+.topnav .menu > li > a[aria-current="page"]{ background:var(--navbar-active); text-decoration: none;}
 
 .topnav .brand{ margin-right:auto; }   /* pushes everything else (the menu) to the right */
 .topnav .menu{ margin:0; }             /* remove the old shorthand if present */
-
-/* Kill the TOP-NAV hamburger only  */
-label[for="topnav-toggle"],
-.topnav label[for="topnav-toggle"],
-.topnav .open-topnav-btn { 
-  display: none !important;
-}
 
 
 /* ==================== Layout ==================== */
@@ -477,11 +479,17 @@ label[for="topnav-toggle"],
     overflow-y:auto;
     z-index:2000 !important;
     transform:translateY(100%); opacity:0; pointer-events:none;
-    transition:transform .22s ease, opacity .22s ease;
+    /* visibility, not just opacity: an invisible drawer whose links are still in
+       the tab order sends keyboard users into a menu they can't see.
+       0s delayed to the end of the slide on the way out, instant on the way in —
+       so the drawer is focusable the moment it opens but still fades out. */
+    visibility:hidden;
+    transition:transform .22s ease, opacity .22s ease, visibility 0s linear .22s;
     padding-bottom: calc(var(--bottomnav-h) + max(env(safe-area-inset-bottom,0px), 16px));
   }
   #sidenav-toggle:checked ~ .sidenav.sidenav--fullscreen{
-    transform:translateY(0); opacity:1; pointer-events:auto;
+    transform:translateY(0); opacity:1; pointer-events:auto; visibility:visible;
+    transition:transform .22s ease, opacity .22s ease, visibility 0s linear 0s;
   }
 
   .sidenav-scrim{
@@ -499,12 +507,19 @@ label[for="topnav-toggle"],
     border-bottom:1px solid rgba(255,255,255,.15);
   }
   .sidenav__title{ font:700 1rem "Lato", system-ui, sans-serif; }
+  /* Now a real <button> (was a <label>) — reset the UA button chrome. */
   .sidenav-close{
     display:inline-flex; align-items:center; gap:.5rem;
     padding:.6rem 1rem; border-radius:999px;
     min-height: 44px;
     color:var(--drawer-header-fg); border:2px solid rgba(255,255,255,.55);
+    background:transparent; cursor:pointer;
     text-decoration:none; font:600 .95rem "Lato", system-ui, sans-serif;
+  }
+  .sidenav-close:focus-visible,
+  .open-sidenav-btn:focus-visible{
+    outline:3px solid var(--focus);
+    outline-offset:2px;
   }
 
   .sidenav{ padding:0; background:var(--sidebar-bg); }
@@ -646,75 +661,56 @@ mark {
   .layout, .content { overflow: visible; }
 }
 
-/* ===================================================================== */
-/* ===== DESKTOP RESTORE (≥741px): normal top bar & no bottom space ===== */
-/* ===================================================================== */
-@media (min-width: 741px) {
-  :root { --topnav-h: 56px !important; }
-
-  .topnav {
-    position: sticky !important;
-    top: 0 !important;
-    background: var(--accent) !important;
-    height: auto !important;
-    min-height: var(--topnav-h) !important;
-    padding: 0 !important;
-    border: 0 !important;
-    overflow: visible !important;
-  }
-
-  .topnav-inner {
-    display: flex !important;
-    min-height: var(--topnav-h) !important;
-    padding-inline: 1rem !important;
-  }
-  .topnav .brand { display: inline !important; }
-
-  .topnav .menu {
-    display: flex !important;
-    position: static !important;
-    left: auto !important; right: auto !important; top: auto !important; bottom: auto !important;
-    height: auto !important;
-    margin: 0 !important; padding: 0 !important;
-    background: transparent !important;
-    z-index: auto !important;
-    flex-direction: row !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
-    gap: .5rem !important;
-  }
-
-  body { padding-bottom: 0 !important; }
-}
+/* A "DESKTOP RESTORE (≥741px)" block used to sit here, ~20 !important
+   declarations re-asserting the top bar's normal appearance. It was written as
+   though the ≤740px mobile block leaked upward. It doesn't — a max-width query
+   simply stops applying above its breakpoint, so the base rules were already in
+   force and every line of it was a no-op. Verified: nothing outside those two
+   blocks styles .topnav at all. The one declaration that wasn't a browser
+   default, .topnav .menu{align-items:center}, moved into the base rule above.
+   Deleting it also removed a background:var(--accent)!important that would have
+   turned the bar light purple in dark mode now that the pinning override
+   is gone. */
 /* ===================================================================== */
 /* ===== MOBILE MODE (≤740px): use dedicated .bottomnav component ======= */
 /* ===================================================================== */
 @media (max-width: 740px) {
-  :root { --topnav-h: 0px !important; }
+  /* A slim course bar. This used to be collapsed to 0 and hidden outright, which
+     left the theme button positioning itself against a bar that wasn't there —
+     it landed on top of the drawer's Close control. The bar carries only the
+     course name and the theme button; page navigation is the .bottomnav's job. */
+  :root { --topnav-h: 48px; }
 
-  /* collapse the top header area */
-  .topnav {
-    background: transparent !important;
-    box-shadow: none !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    position: static !important;
-    overflow: hidden !important;
-  }
-  .topnav-inner,
-  .topnav .brand { display: none !important; }
+  .topnav-inner { padding-inline: .75rem; gap: .5rem; }
+  .topnav .brand { font-size: 1.05em; }
 
   /* IMPORTANT: hide the desktop <ul class="menu"> entirely on mobile
      (we’ll use the injected .bottomnav instead) */
-  .topnav .menu { display: none !important; }
+  .topnav .menu { display: none; }
 
   /* show the real bottom nav injected by nav.js */
-  .bottomnav { display: block !important; }
+  .bottomnav { display: block; }
 
   /* reserve space so content/footer aren’t covered by bottom bar */
-  body { padding-bottom: calc(var(--bottomnav-h, 78px) + env(safe-area-inset-bottom)) !important; }
+  body { padding-bottom: calc(var(--bottomnav-h, 78px) + env(safe-area-inset-bottom)); }
+}
+
+/* ===================================================================== */
+/* ===== Top bar is FIXED wherever the drawer exists (≤900px) =========== */
+/* ===================================================================== */
+/* Opening the drawer freezes the page by setting body{position:fixed;top:-Npx}.
+   A sticky top bar has no scroll container to stick to once that happens, so it
+   would ride the frozen body off the top of the screen and leave a gap above the
+   drawer. Fixed positioning is measured against the viewport and is unaffected. */
+@media (max-width: 900px) {
+  .topnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  /* the bar no longer takes up space in the flow, so hold a slot for it */
+  body { padding-top: var(--topnav-h); }
 }
 
 
@@ -782,13 +778,10 @@ html {
   background-color: #3d3a20;
   color: #e8e4c0;
 }
-/* Keep topnav with original colors in dark mode */
-[data-theme="dark"] .topnav{
-  background: #260444 !important;
-}
-[data-theme="dark"] .topnav .menu > li > a[aria-current="page"]{
-  background: #3b006f !important;
-}
+/* The two rules that used to sit here pinned the top bar back to #260444 and
+   #3b006f in dark mode, because both read from --accent/--focus, which flip.
+   They now read --navbar-bg / --navbar-active, which don't. Same colours on
+   screen; no override, no !important. */
 [data-theme="dark"] .bottomnav{
   background: #1a1c1f;
   border-top-color: #2d3139;
@@ -808,39 +801,44 @@ html {
 }
 
 /* ==================== Dark Mode Toggle Button ==================== */
+/* nav.js appends this to .topnav-inner, so it is laid out inside the top bar
+   rather than floating over the page. It used to be a fixed circle in a screen
+   corner, which collided with the mobile drawer's Close button and needed
+   repositioning per breakpoint. In the bar it needs neither.
+   nav.js sets no inline styles — everything about how it looks lives here.
+   The bar is --navbar-bg with white text in BOTH themes, so this is styled once
+   and needs no dark-mode variant. */
 .theme-toggle {
-  position: fixed !important;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 9999 !important;
-  width: 48px;
-  height: 48px;
+  flex: none;
+  /* 38px: in the 48px phone bar a 44px circle leaves only 2px above and below
+     and reads as jammed in. 38 sits well in both the 48px phone bar and the
+     56px desktop one, and still clears the 24px minimum target size. */
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 2px solid var(--border, #e2e3e5);
-  background: var(--bg, #ffffff);
-  color: var(--text, #141414);
+  border: 2px solid rgba(255,255,255,.55);
+  background: transparent;
+  color: #fff;
   cursor: pointer;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,.25);
-  transition: transform 0.2s, box-shadow 0.2s;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transition: background-color .2s, border-color .2s;
 }
 
 .theme-toggle:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0,0,0,.2);
+  background: rgba(255,255,255,.14);
+  border-color: #fff;
 }
 
 .theme-toggle:focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 2px solid #fff;
   outline-offset: 2px;
 }
 
 .theme-toggle svg {
-  width: 24px;
-  height: 24px;
-  transition: transform 0.3s;
+  width: 19px;
+  height: 19px;
 }
 
 /* Sun icon (shown in dark mode) */
@@ -850,24 +848,17 @@ html {
 [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
-[data-theme="dark"] .theme-toggle {
-  border-color: var(--border);
-  box-shadow: 0 2px 10px rgba(0,0,0,.4);
-}
-
-/* Mobile: position in upper right to avoid bottom nav */
-@media (max-width: 740px) {
-  .theme-toggle {
-    bottom: auto;
-    top: calc(var(--topnav-h, 56px) + 0.75rem);
-    right: 1rem;
-    width: 44px;
-    height: 44px;
-  }
-  .theme-toggle svg {
-    width: 22px;
-    height: 22px;
-  }
+/* Degraded fallback only: if nav.js failed to build the top bar there is no
+   bar to sit in, so the button floats rather than disappearing entirely. */
+.theme-toggle--floating {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  border-color: var(--border, #e2e3e5);
+  background: var(--bg, #ffffff);
+  color: var(--text, #141414);
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
 }
 
 /* Dark mode: mobile sidenav button text should be dark against light purple bg */
