@@ -103,7 +103,7 @@
           href: "/calendar/index.html",
           children: [
             { label: "Monday Class", href: "/calendar/monday-calendar.html" },
-            { label: "Tuesday Class", href: "/calendar/tuesday-calendar.html" }
+            { label: "Thursday Class", href: "/calendar/tuesday-calendar.html" }
           ]
         },
         {
