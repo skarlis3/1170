@@ -33,8 +33,14 @@
   /* How wide one day column may get, and the space between columns. calendar.js
      multiplies both out to cap the whole week grid, so a sparse week does not
      stretch one day across the page. Raise --cal-col-max to let a lone day run
-     wider; the cap has no effect once three or more days carry events. */
-  --cal-col-max: 22rem;
+     wider; the cap has no effect once three or more days carry events.
+
+     14rem chosen by Sarah 15 Aug 2026 from a live comparison. Note that
+     .week-grid also carries min-width: 34rem, which is what stops the seven-day
+     layout collapsing on a phone. For a one-day week that floor is the larger of
+     the two, so the lone column lands a little above 14rem in practice. Leave
+     the floor alone; it is doing a different job. */
+  --cal-col-max: 14rem;
   --cal-col-gap: 10px;
   --cal-ghost-bg: color-mix(in srgb, var(--text) 4%, var(--bg));
   --cal-kind-class: var(--accent);
