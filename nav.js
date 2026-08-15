@@ -102,8 +102,8 @@
           label: "Calendars",
           href: "/calendar/index.html",
           children: [
-            { label: "Monday Class", href: "/calendar/monday-calendar.html" },
-            { label: "Thursday Class", href: "/calendar/tuesday-calendar.html" }
+            { label: "Monday Class", href: "/calendar/calendar-a.html" },
+            { label: "Thursday Class", href: "/calendar/calendar-b.html" }
           ]
         },
         {
